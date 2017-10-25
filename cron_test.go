@@ -356,6 +356,45 @@ func TestJob(t *testing.T) {
 	}
 }
 
+// TestCron_Parallel tests that with 2 crons with the same job
+// They should only execute once each job event
+func TestCron_Parallel(t *testing.T) {
+	wg := &sync.WaitGroup{}
+	wg.Add(2)
+
+	cron1, err := New()
+	if err != nil {
+		t.Fatal("unexpected error")
+	}
+	defer cron1.Stop()
+
+	cron2, err := New()
+	if err != nil {
+		t.Fatal("unexpected error")
+	}
+	defer cron2.Stop()
+
+	job := Job{
+		Name:   "test-parallel",
+		Rhythm: "* * * * * ?",
+		Func: func(context.Context) error {
+			wg.Done()
+			return nil
+		},
+	}
+	cron1.AddJob(job)
+	cron2.AddJob(job)
+
+	cron1.Start(context.Background())
+	cron2.Start(context.Background())
+
+	select {
+	case <-time.After(time.Duration(2) * ONE_SECOND):
+		t.FailNow()
+	case <-wait(wg):
+	}
+}
+
 func wait(wg *sync.WaitGroup) chan bool {
 	ch := make(chan bool)
 	go func() {
