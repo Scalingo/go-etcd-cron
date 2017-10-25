@@ -16,7 +16,7 @@ By default the library creates an etcd client on `127.0.0.1:2379`
 
 ```go
 c, _ := clientv3.New(clientv3.Config{
-  Endpoints: []string{"etcd-host1:2379", "etcd-host2:2379"}
+  Endpoints: []string{"etcd-host1:2379", "etcd-host2:2379"},
 })
 cron, _ := etcdcron.New(WithEtcdMutexBuilder(c))
 cron.AddJob(Job{
