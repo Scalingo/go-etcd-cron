@@ -4,6 +4,7 @@ package etcdcron
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"sort"
 	"time"
@@ -214,7 +215,7 @@ func (c *Cron) run(ctx context.Context) {
 				e.Next = e.Schedule.Next(effective)
 
 				go func(ctx context.Context, e *Entry) {
-					m, err := c.etcdclient.NewMutex("etcd-cron/" + e.Job.Name)
+					m, err := c.etcdclient.NewMutex(fmt.Sprintf("etcd-cron/%s/%d", e.Job.Name, effective.Unix()))
 					if err != nil {
 						go c.etcdErrorsHandler(ctx, e.Job, errors.Wrapf(err, "fail to create etcd mutex for job '%v'", e.Job.Name))
 						return
@@ -229,14 +230,6 @@ func (c *Cron) run(ctx context.Context) {
 						go c.etcdErrorsHandler(ctx, e.Job, errors.Wrapf(err, "fail to lock mutex '%v'", m.Key()))
 						return
 					}
-
-					defer func() {
-						time.Sleep(time.Second)
-						err := m.Unlock(ctx)
-						if err != nil {
-							go c.etcdErrorsHandler(ctx, e.Job, errors.Wrapf(err, "fail to unlock mutex '%v'", m.Key()))
-						}
-					}()
 
 					err = e.Job.Run(ctx)
 					if err != nil {
