@@ -238,6 +238,10 @@ func (c *Cron) run(ctx context.Context) {
 				e.Next = e.Schedule.Next(effective)
 
 				go func(ctx context.Context, e *Entry) {
+					if c.funcCtx != nil {
+						ctx = c.funcCtx(ctx, e.Job)
+					}
+
 					m, err := c.etcdclient.NewMutex(fmt.Sprintf("etcd_cron/%s/%d", e.Job.canonicalName(), effective.Unix()))
 					if err != nil {
 						go c.etcdErrorsHandler(ctx, e.Job, errors.Wrapf(err, "fail to create etcd mutex for job '%v'", e.Job.Name))
@@ -254,9 +258,6 @@ func (c *Cron) run(ctx context.Context) {
 						return
 					}
 
-					if c.funcCtx != nil {
-						ctx = c.funcCtx(ctx, e.Job)
-					}
 					err = e.Job.Run(ctx)
 					if err != nil {
 						go c.errorsHandler(ctx, e.Job, err)
