@@ -30,6 +30,7 @@ type Cron struct {
 	snapshot          chan []*Entry
 	etcdErrorsHandler func(context.Context, Job, error)
 	errorsHandler     func(context.Context, Job, error)
+	funcCtx           func(context.Context, Job) context.Context
 	running           bool
 	etcdclient        EtcdMutexBuilder
 }
@@ -40,8 +41,8 @@ type Job struct {
 	Name string
 	// Cron-formatted rhythm (ie. 0,10,30 1-5 0 * * *)
 	Rhythm string
-	// Routine méthode
-	Func func(ctx context.Context) error
+	// Routine method
+	Func func(context.Context) error
 }
 
 func (j Job) Run(ctx context.Context) error {
@@ -121,6 +122,12 @@ func WithErrorsHandler(f func(context.Context, Job, error)) CronOpt {
 func WithEtcdMutexBuilder(b EtcdMutexBuilder) CronOpt {
 	return CronOpt(func(cron *Cron) {
 		cron.etcdclient = b
+	})
+}
+
+func WithFuncCtx(f func(context.Context, Job) context.Context) CronOpt {
+	return CronOpt(func(cron *Cron) {
+		cron.funcCtx = f
 	})
 }
 
@@ -247,6 +254,9 @@ func (c *Cron) run(ctx context.Context) {
 						return
 					}
 
+					if c.funcCtx != nil {
+						ctx = c.funcCtx(ctx, e.Job)
+					}
 					err = e.Job.Run(ctx)
 					if err != nil {
 						go c.errorsHandler(ctx, e.Job, err)
