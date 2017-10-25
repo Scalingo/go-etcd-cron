@@ -6,10 +6,13 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/coreos/etcd/clientv3"
+	"github.com/iancoleman/strcase"
 	"github.com/pkg/errors"
 )
 
@@ -43,6 +46,19 @@ type Job struct {
 
 func (j Job) Run(ctx context.Context) error {
 	return j.Func(ctx)
+}
+
+var (
+	nonAlphaNumerical = regexp.MustCompile("[^a-z0-9_]")
+)
+
+func (j Job) canonicalName() string {
+	return strcase.ToSnake(
+		nonAlphaNumerical.ReplaceAllString(
+			strings.ToLower(j.Name),
+			"_",
+		),
+	)
 }
 
 // The Schedule describes a job's duty cycle.
@@ -215,7 +231,7 @@ func (c *Cron) run(ctx context.Context) {
 				e.Next = e.Schedule.Next(effective)
 
 				go func(ctx context.Context, e *Entry) {
-					m, err := c.etcdclient.NewMutex(fmt.Sprintf("etcd-cron/%s/%d", e.Job.Name, effective.Unix()))
+					m, err := c.etcdclient.NewMutex(fmt.Sprintf("etcd_cron/%s/%d", e.Job.canonicalName(), effective.Unix()))
 					if err != nil {
 						go c.etcdErrorsHandler(ctx, e.Job, errors.Wrapf(err, "fail to create etcd mutex for job '%v'", e.Job.Name))
 						return
