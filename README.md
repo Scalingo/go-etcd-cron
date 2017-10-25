@@ -2,6 +2,8 @@
 
 This package has been based on the project [https://github.com/robfig/cron](https://github.com/robfig/cron)
 
+[ ![Codeship Status for Scalingo/go-etcd-cron](https://app.codeship.com/projects/36ea06c0-9bc8-0135-7b7d-329e62b9d6c9/status?branch=master)](https://app.codeship.com/projects/252777)
+
 ## Goal
 
 This package aims at implementing a distributed and fault tolerant cron in order to:
