@@ -1,3 +1,7 @@
+# v1.1.1 - Feb. 16 2020
+
+* Bugfix, error was <nil> when a job was panicking
+
 # v1.1.0 - Nov. 12 2019
 
 * Update etcd dependencies
