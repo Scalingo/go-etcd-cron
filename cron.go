@@ -244,7 +244,7 @@ func (c *Cron) run(ctx context.Context) {
 						if r != nil {
 							err, ok := r.(error)
 							if !ok {
-								err = fmt.Errorf("%v", err)
+								err = fmt.Errorf("%v", r)
 							}
 							err = fmt.Errorf("panic: %v, stacktrace: %s", err, string(debug.Stack()))
 							go c.errorsHandler(ctx, e.Job, err)
