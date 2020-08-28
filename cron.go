@@ -14,7 +14,7 @@ import (
 
 	"github.com/iancoleman/strcase"
 	"github.com/pkg/errors"
-	"go.etcd.io/etcd/clientv3"
+	"go.etcd.io/etcd/v3/clientv3"
 )
 
 const (
