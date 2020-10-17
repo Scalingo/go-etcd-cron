@@ -1,3 +1,7 @@
+# v1.2.1 - Oct. 17 2020
+
+* Migrate to go mod + update deps
+
 # v1.1.1 - Feb. 16 2020
 
 * Bugfix, error was <nil> when a job was panicking
