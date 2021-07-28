@@ -2,6 +2,8 @@
 
 ## To Be Released
 
+* build(deps): bump github.com/iancoleman/strcase from 0.1.1 to 0.2.0
+
 ## v1.3.0 - Jul. 28 2021
 
 * Bump etcd client to 3.5.0 and also bump to Go 1.16
