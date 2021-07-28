@@ -1,6 +1,9 @@
 # Changelog
 
 ## To Be Released
+
+## v1.3.0 - Jul. 28 2021
+
 * Bump etcd client to 3.5.0 and also bump to Go 1.16
   [#6](https://github.com/Scalingo/go-etcd-cron/pull/6)
 
