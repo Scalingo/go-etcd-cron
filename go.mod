@@ -1,6 +1,6 @@
 module github.com/Scalingo/go-etcd-cron
 
-go 1.13
+go 1.16
 
 require (
 	github.com/iancoleman/strcase v0.1.1
