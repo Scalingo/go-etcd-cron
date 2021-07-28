@@ -3,12 +3,12 @@ package etcdcron
 import (
 	"context"
 
-	"go.etcd.io/etcd/v3/clientv3"
-	"go.etcd.io/etcd/v3/clientv3/concurrency"
+	etcdclient "go.etcd.io/etcd/client/v3"
+	"go.etcd.io/etcd/client/v3/concurrency"
 )
 
 type DistributedMutex interface {
-	IsOwner() clientv3.Cmp
+	IsOwner() etcdclient.Cmp
 	Key() string
 	Lock(ctx context.Context) error
 	Unlock(ctx context.Context) error
@@ -19,11 +19,11 @@ type EtcdMutexBuilder interface {
 }
 
 type etcdMutexBuilder struct {
-	*clientv3.Client
+	*etcdclient.Client
 }
 
-func NewEtcdMutexBuilder(config clientv3.Config) (EtcdMutexBuilder, error) {
-	c, err := clientv3.New(config)
+func NewEtcdMutexBuilder(config etcdclient.Config) (EtcdMutexBuilder, error) {
+	c, err := etcdclient.New(config)
 	if err != nil {
 		return nil, err
 	}
