@@ -12,7 +12,7 @@ import (
 
 	"github.com/iancoleman/strcase"
 	"github.com/pkg/errors"
-	client "go.etcd.io/etcd/client/v3"
+	etcdclient "go.etcd.io/etcd/client/v3"
 )
 
 const (
@@ -143,13 +143,13 @@ func New(opts ...CronOpt) (*Cron, error) {
 		opt(cron)
 	}
 	if cron.etcdclient == nil {
-		etcdclient, err := NewEtcdMutexBuilder(client.Config{
+		etcdClient, err := NewEtcdMutexBuilder(etcdclient.Config{
 			Endpoints: []string{defaultEtcdEndpoint},
 		})
 		if err != nil {
 			return nil, err
 		}
-		cron.etcdclient = etcdclient
+		cron.etcdclient = etcdClient
 	}
 	if cron.etcdErrorsHandler == nil {
 		cron.etcdErrorsHandler = func(ctx context.Context, j Job, err error) {
