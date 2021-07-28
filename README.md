@@ -1,8 +1,9 @@
-[![GoDoc](http://godoc.org/github.com/Scalingo/go-etcd-cron?status.png)](http://godoc.org/github.com/Scalingo/go-etcd-cron)
+# Go Etcd Cron v1.2.1
 
 This package has been based on the project [https://github.com/robfig/cron](https://github.com/robfig/cron)
 
 [ ![Codeship Status for Scalingo/go-etcd-cron](https://app.codeship.com/projects/36ea06c0-9bc8-0135-7b7d-329e62b9d6c9/status?branch=master)](https://app.codeship.com/projects/252777)
+[![GoDoc](http://godoc.org/github.com/Scalingo/go-etcd-cron?status.png)](http://godoc.org/github.com/Scalingo/go-etcd-cron)
 
 ## Goal
 
@@ -54,3 +55,20 @@ cron.AddJob(Job{
   },
 })
 ```
+
+## Release a New Version
+
+Bump new version number in `CHANGELOG.md` and `README.md`.
+
+Commit, tag and create a new release:
+
+```shell
+git add CHANGELOG.md README.md
+git commit -m "Bump v1.2.1"
+git tag v1.2.1
+git push origin master
+git push --tags
+hub release create v1.2.1
+```
+
+The title of the release should be the version number and the text of the release is the same as the changelog.
