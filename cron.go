@@ -1,5 +1,3 @@
-// This library implements a cron spec parser and runner.  See the README for
-// more details.
 package etcdcron
 
 import (
@@ -14,7 +12,7 @@ import (
 
 	"github.com/iancoleman/strcase"
 	"github.com/pkg/errors"
-	"go.etcd.io/etcd/v3/clientv3"
+	client "go.etcd.io/etcd/client/v3"
 )
 
 const (
@@ -145,7 +143,7 @@ func New(opts ...CronOpt) (*Cron, error) {
 		opt(cron)
 	}
 	if cron.etcdclient == nil {
-		etcdclient, err := NewEtcdMutexBuilder(clientv3.Config{
+		etcdclient, err := NewEtcdMutexBuilder(client.Config{
 			Endpoints: []string{defaultEtcdEndpoint},
 		})
 		if err != nil {
