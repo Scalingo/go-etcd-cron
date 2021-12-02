@@ -2,6 +2,7 @@
 
 ## To Be Released
 
+* build(deps): bump go.etcd.io/etcd/client/v3 from 3.5.0 to 3.5.1
 * build(deps): bump github.com/iancoleman/strcase from 0.1.1 to 0.2.0
 
 ## v1.3.0 - Jul. 28 2021
