@@ -141,7 +141,6 @@ func TestSnapshotEntries(t *testing.T) {
 		t.FailNow()
 	case <-wait(wg):
 	}
-
 }
 
 // Test that the entries are correctly sorted.
