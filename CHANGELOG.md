@@ -2,6 +2,7 @@
 
 ## To Be Released
 
+* chore(go): use go 1.17
 * build(deps): bump go.etcd.io/etcd/client/v3 from 3.5.0 to 3.5.4
 * build(deps): bump github.com/iancoleman/strcase from 0.1.1 to 0.2.0
 
