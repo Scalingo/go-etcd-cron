@@ -2,6 +2,8 @@
 
 ## To Be Released
 
+* build(deps): bump go.etcd.io/etcd/client/v3 from 3.5.4 to 3.5.5
+
 ## v1.3.1 - Jun. 09 2022
 
 * chore(go): use go 1.17
