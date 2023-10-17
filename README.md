@@ -1,4 +1,4 @@
-# Go Etcd Cron v1.3.1
+# Go Etcd Cron v1.3.2
 
 This package has been based on the project [https://github.com/robfig/cron](https://github.com/robfig/cron)
 
@@ -63,7 +63,7 @@ Bump new version number in `CHANGELOG.md` and `README.md`.
 Commit, tag and create a new release:
 
 ```sh
-version="1.3.1"
+version="1.3.2"
 
 git switch --create release/${version}
 git add CHANGELOG.md README.md
