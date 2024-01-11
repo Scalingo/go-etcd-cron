@@ -3,6 +3,7 @@ package etcdcron
 import (
 	"context"
 	"fmt"
+	"google.golang.org/protobuf/types/known/anypb"
 	"log"
 	"regexp"
 	"runtime/debug"
@@ -42,6 +43,12 @@ type Job struct {
 	Rhythm string
 	// Routine method
 	Func func(context.Context) error
+
+	Repeats  int32
+	DueTime  string
+	TTL      string
+	Data     *anypb.Any
+	Metadata map[string]string
 }
 
 func (j Job) Run(ctx context.Context) error {
@@ -164,6 +171,16 @@ func New(opts ...CronOpt) (*Cron, error) {
 	return cron, nil
 }
 
+// GetJob retrieves a job by name.
+func (c *Cron) GetJob(jobName string) *Job {
+	for _, entry := range c.entries {
+		if entry.Job.Name == jobName {
+			return &entry.Job
+		}
+	}
+	return nil
+}
+
 // AddFunc adds a Job to the Cron to be run on the given schedule.
 func (c *Cron) AddJob(job Job) error {
 	schedule, err := Parse(job.Rhythm)
@@ -171,6 +188,25 @@ func (c *Cron) AddJob(job Job) error {
 		return err
 	}
 	c.Schedule(schedule, job)
+	return nil
+}
+
+// DeleteJob deletes a job by name.
+func (c *Cron) DeleteJob(jobName string) error {
+	var updatedEntries []*Entry
+	found := false
+	for _, entry := range c.entries {
+		if entry.Job.Name == jobName {
+			found = true
+			continue
+		}
+		// Keep the entries that don't match the specified jobName
+		updatedEntries = append(updatedEntries, entry)
+	}
+	if !found {
+		return fmt.Errorf("job not found: %s", jobName)
+	}
+	c.entries = updatedEntries
 	return nil
 }
 
@@ -186,6 +222,17 @@ func (c *Cron) Schedule(schedule Schedule, job Job) {
 	}
 
 	c.add <- entry
+}
+
+func (c *Cron) ListJobsByAppID(appID string) []*Job {
+	var appJobs []*Job
+	for _, entry := range c.entries {
+		if strings.HasPrefix(entry.Job.Name, fmt.Sprintf("%s_", appID)) {
+			// Job belongs to the specified app_id
+			appJobs = append(appJobs, &entry.Job)
+		}
+	}
+	return appJobs
 }
 
 // Entries returns a snapshot of the cron entries.
@@ -253,7 +300,7 @@ func (c *Cron) run(ctx context.Context) {
 						ctx = c.funcCtx(ctx, e.Job)
 					}
 
-					m, err := c.etcdclient.NewMutex(fmt.Sprintf("etcd_cron/%s/%d", e.Job.canonicalName(), effective.Unix()))
+					m, err := c.etcdclient.NewMutex(fmt.Sprintf("etcd_cron/%s", e.Job.canonicalName()))
 					if err != nil {
 						go c.etcdErrorsHandler(ctx, e.Job, errors.Wrapf(err, "fail to create etcd mutex for job '%v'", e.Job.Name))
 						return
