@@ -294,8 +294,7 @@ func (c *Cron) run(ctx context.Context) {
 						ctx = c.funcCtx(ctx, e.Job)
 					}
 
-					m, err := c.etcdclient.NewMutex(fmt.Sprintf("etcd_cron/%s", e.Job.canonicalName()))
-					if err != nil {
+					m, err := c.etcdclient.NewMutex(fmt.Sprintf("etcd_cron/%s/%d", e.Job.canonicalName(), effective.Unix()))					if err != nil {
 						go c.etcdErrorsHandler(ctx, e.Job, errors.Wrapf(err, "fail to create etcd mutex for job '%v'", e.Job.Name))
 						return
 					}
