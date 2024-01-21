@@ -355,6 +355,109 @@ func TestJob(t *testing.T) {
 	}
 }
 
+// Add some jobs, try to ListJobsByPrefix
+func TestListJobsByPrefix(t *testing.T) {
+	wg := &sync.WaitGroup{}
+	wg.Add(2)
+
+	cron, err := New()
+	if err != nil {
+		t.Fatal("unexpected error")
+	}
+	defer cron.Stop()
+
+	// Add jobs with different prefixes
+	cron.AddJob(Job{Name: "prefix_test_job1", Rhythm: "* * * * * ?", Func: func(context.Context) error { wg.Done(); return nil }})
+	cron.AddJob(Job{Name: "prefix_test_job2", Rhythm: "* * * * * ?", Func: func(context.Context) error { wg.Done(); return nil }})
+	cron.AddJob(Job{Name: "other_job", Rhythm: "* * * * * ?", Func: func(context.Context) error { return nil }})
+
+	cron.Start(context.Background())
+
+	// Ensure only jobs with the specified prefix are returned
+	prefixJobs := cron.ListJobsByPrefix("prefix_test")
+	if len(prefixJobs) != 2 {
+		t.Errorf("ListJobsByPrefix did not return the correct number of jobs. Expected: 2, Actual: %d", len(prefixJobs))
+		t.FailNow()
+	}
+
+	select {
+	case <-time.After(ONE_SECOND):
+		t.FailNow()
+	case <-wait(wg):
+	}
+}
+
+// Add a job, then DeleteJob
+func TestDeleteJob(t *testing.T) {
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+
+	cron, err := New()
+	if err != nil {
+		t.Fatal("unexpected error")
+	}
+	defer cron.Stop()
+
+	cron.AddJob(Job{Name: "delete_test_job", Rhythm: "* * * * * ?", Func: func(context.Context) error { wg.Done(); return nil }})
+
+	cron.Start(context.Background())
+
+	err = cron.DeleteJob("delete_test_job")
+	if err != nil {
+		t.Errorf("Error deleting job: %v", err)
+		t.FailNow()
+	}
+
+	// Ensure the job is no longer in the entries
+	found := false
+	for _, entry := range cron.Entries() {
+		if entry.Job.Name == "delete_test_job" {
+			found = true
+			break
+		}
+	}
+
+	if found {
+		t.Error("DeleteJob did not remove the job from entries")
+		t.FailNow()
+	}
+
+	select {
+	case <-time.After(ONE_SECOND):
+		t.FailNow()
+	case <-wait(wg):
+	}
+}
+
+// Add a job, then GetJob
+func TestGetJob(t *testing.T) {
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+
+	cron, err := New()
+	if err != nil {
+		t.Fatal("unexpected error")
+	}
+	defer cron.Stop()
+
+	jobName := "get_test_job"
+	cron.AddJob(Job{Name: jobName, Rhythm: "* * * * * ?", Func: func(context.Context) error { wg.Done(); return nil }})
+
+	cron.Start(context.Background())
+
+	job := cron.GetJob(jobName)
+	if job == nil || job.Name != jobName {
+		t.Error("GetJob did not return the expected job")
+		t.FailNow()
+	}
+
+	select {
+	case <-time.After(15 * time.Second):
+		t.FailNow()
+	case <-wait(wg):
+	}
+}
+
 // TestCron_Parallel tests that with 2 crons with the same job
 // They should only execute once each job event
 func TestCron_Parallel(t *testing.T) {

@@ -3,7 +3,6 @@ package etcdcron
 import (
 	"context"
 	"fmt"
-	"google.golang.org/protobuf/types/known/anypb"
 	"log"
 	"regexp"
 	"runtime/debug"
@@ -43,12 +42,6 @@ type Job struct {
 	Rhythm string
 	// Routine method
 	Func func(context.Context) error
-
-	Repeats  int32
-	DueTime  string
-	TTL      string
-	Data     *anypb.Any
-	Metadata map[string]string
 }
 
 func (j Job) Run(ctx context.Context) error {
@@ -224,15 +217,16 @@ func (c *Cron) Schedule(schedule Schedule, job Job) {
 	c.add <- entry
 }
 
-func (c *Cron) ListJobsByAppID(appID string) []*Job {
-	var appJobs []*Job
+// ListJobsByPrefix returns the list of jobs with the relevant prefix
+func (c *Cron) ListJobsByPrefix(prefix string) []*Job {
+	var prefixJobs []*Job
 	for _, entry := range c.entries {
-		if strings.HasPrefix(entry.Job.Name, fmt.Sprintf("%s_", appID)) {
-			// Job belongs to the specified app_id
-			appJobs = append(appJobs, &entry.Job)
+		if strings.HasPrefix(entry.Job.Name, fmt.Sprintf("%s_", prefix)) {
+			// Job belongs to the specified prefix
+			prefixJobs = append(prefixJobs, &entry.Job)
 		}
 	}
-	return appJobs
+	return prefixJobs
 }
 
 // Entries returns a snapshot of the cron entries.
