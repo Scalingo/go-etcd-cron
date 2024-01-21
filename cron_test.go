@@ -452,7 +452,7 @@ func TestGetJob(t *testing.T) {
 	}
 
 	select {
-	case <-time.After(15 * time.Second):
+	case <-time.After(ONE_SECOND):
 		t.FailNow()
 	case <-wait(wg):
 	}

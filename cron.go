@@ -221,7 +221,7 @@ func (c *Cron) Schedule(schedule Schedule, job Job) {
 func (c *Cron) ListJobsByPrefix(prefix string) []*Job {
 	var prefixJobs []*Job
 	for _, entry := range c.entries {
-		if strings.HasPrefix(entry.Job.Name, fmt.Sprintf("%s_", prefix)) {
+		if strings.HasPrefix(entry.Job.Name, prefix) {
 			// Job belongs to the specified prefix
 			prefixJobs = append(prefixJobs, &entry.Job)
 		}
@@ -294,7 +294,8 @@ func (c *Cron) run(ctx context.Context) {
 						ctx = c.funcCtx(ctx, e.Job)
 					}
 
-					m, err := c.etcdclient.NewMutex(fmt.Sprintf("etcd_cron/%s/%d", e.Job.canonicalName(), effective.Unix()))					if err != nil {
+					m, err := c.etcdclient.NewMutex(fmt.Sprintf("etcd_cron/%s/%d", e.Job.canonicalName(), effective.Unix()))
+					if err != nil {
 						go c.etcdErrorsHandler(ctx, e.Job, errors.Wrapf(err, "fail to create etcd mutex for job '%v'", e.Job.Name))
 						return
 					}
