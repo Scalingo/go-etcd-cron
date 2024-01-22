@@ -400,6 +400,20 @@ func TestDeleteJob(t *testing.T) {
 
 	cron.AddJob(Job{Name: "delete_test_job", Rhythm: "* * * * * ?", Func: func(context.Context) error { wg.Done(); return nil }})
 
+	// Ensure the job is in the entries before deletion
+	foundBeforeDeletion := false
+	for _, entry := range cron.Entries() {
+		if entry.Job.Name == "delete_test_job" {
+			foundBeforeDeletion = true
+			break
+		}
+	}
+
+	if !foundBeforeDeletion {
+		t.Error("Job not found in entries before deletion")
+		t.FailNow()
+	}
+
 	cron.Start(context.Background())
 
 	err = cron.DeleteJob("delete_test_job")
@@ -408,24 +422,26 @@ func TestDeleteJob(t *testing.T) {
 		t.FailNow()
 	}
 
-	// Ensure the job is no longer in the entries
-	found := false
+	// Ensure the job is no longer in the entries after deletion
+	foundAfterDeletion := false
 	for _, entry := range cron.Entries() {
 		if entry.Job.Name == "delete_test_job" {
-			found = true
+			foundAfterDeletion = true
 			break
 		}
 	}
 
-	if found {
+	if foundAfterDeletion {
 		t.Error("DeleteJob did not remove the job from entries")
 		t.FailNow()
 	}
 
+	// Ensure the job is not triggered after deletion
 	select {
 	case <-time.After(ONE_SECOND):
-		t.FailNow()
+		// This is expected since the job should not be triggered
 	case <-wait(wg):
+		t.Error("Job was triggered after deletion")
 	}
 }
 
