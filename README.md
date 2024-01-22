@@ -56,6 +56,13 @@ cron.AddJob(Job{
 })
 ```
 
+## Tests
+
+Pre-requisites to run the tests locally:
+- [Install etcd](https://etcd.io/docs/v3.4/install/) 
+- Launch etcd: `etcd --logger=zap`
+- Proceed to run tests: `go test`
+
 ## Release a New Version
 
 Bump new version number in `CHANGELOG.md` and `README.md`.
