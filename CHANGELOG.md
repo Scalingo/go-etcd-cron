@@ -2,6 +2,8 @@
 
 ## To Be Released
 
+* build(go): use go 1.22
+
 ## v1.3.2 - Oct. 17 2023
 
 * Various dependencies updates

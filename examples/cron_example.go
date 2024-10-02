@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/Scalingo/go-etcd-cron"
+	etcdcron "github.com/Scalingo/go-etcd-cron"
 )
 
 func main() {
