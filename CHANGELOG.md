@@ -2,6 +2,8 @@
 
 ## To Be Released
 
+* build(go): use go 1.24
+
 ## v1.3.3 - Oct. 2 2024
 
 * build(go): use go 1.22
