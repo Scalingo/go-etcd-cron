@@ -3,6 +3,7 @@
 ## To Be Released
 
 * build(go): use go 1.24
+* feat: add a NewEtcdMutexBuilderFromClient function to create a mutex builder from an existing etcd client
 
 ## v1.3.3 - Oct. 2 2024
 
