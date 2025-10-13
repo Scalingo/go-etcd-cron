@@ -22,6 +22,10 @@ type etcdMutexBuilder struct {
 	*etcdclient.Client
 }
 
+func NewEtcdMutexBuilderFromClient(c *etcdclient.Client) (EtcdMutexBuilder, error) {
+	return etcdMutexBuilder{Client: c}, nil
+}
+
 func NewEtcdMutexBuilder(config etcdclient.Config) (EtcdMutexBuilder, error) {
 	c, err := etcdclient.New(config)
 	if err != nil {
@@ -32,7 +36,7 @@ func NewEtcdMutexBuilder(config etcdclient.Config) (EtcdMutexBuilder, error) {
 
 func (c etcdMutexBuilder) NewMutex(pfx string) (DistributedMutex, error) {
 	// As each task iteration lock name is unique, we don't really care about unlocking it
-	// So the etcd lease will alst 10 minutes, it ensures that even if another server
+	// So the etcd lease will last 10 minutes, it ensures that even if another server
 	// clock is ill-configured (with a maximum span of 10 minutes), it won't execute the task
 	// twice.
 	session, err := concurrency.NewSession(c.Client, concurrency.WithTTL(60*10))
