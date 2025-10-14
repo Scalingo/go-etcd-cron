@@ -1,5 +1,7 @@
 # Changelog
 
+## To Be Released
+
 ## v1.3.4 - Oct. 14 2025
 
 * build(go): use go 1.24
