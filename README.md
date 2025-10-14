@@ -1,4 +1,4 @@
-# Go Etcd Cron v1.3.3
+# Go Etcd Cron v1.3.4
 
 This package has been based on the project [https://github.com/robfig/cron](https://github.com/robfig/cron)
 
@@ -63,13 +63,13 @@ Bump new version number in `CHANGELOG.md` and `README.md`.
 Commit, tag and create a new release:
 
 ```sh
-version="1.3.3"
+version="1.3.4"
 
 git switch --create release/${version}
 git add CHANGELOG.md README.md
 git commit --message="Bump v${version}"
 git push --set-upstream origin release/${version}
-gh pr create --reviewer=EtienneM --title "$(git log -1 --pretty=%B)"
+gh pr create --reviewer=scalingo/team-ist --title "$(git log -1 --pretty=%B)"
 ```
 
 Once the pull request merged, you can tag the new release.

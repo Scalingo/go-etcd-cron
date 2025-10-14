@@ -1,6 +1,6 @@
 # Changelog
 
-## To Be Released
+## v1.3.4 - Oct. 14 2025
 
 * build(go): use go 1.24
 * feat: add a NewEtcdMutexBuilderFromClient function to create a mutex builder from an existing etcd client
