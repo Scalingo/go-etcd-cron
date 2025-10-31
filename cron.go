@@ -23,15 +23,16 @@ const (
 // specified by the schedule. It may be started, stopped, and the entries may
 // be inspected while running.
 type Cron struct {
-	entries           []*Entry
-	stop              chan struct{}
-	add               chan *Entry
-	snapshot          chan []*Entry
-	etcdErrorsHandler func(context.Context, Job, error)
-	errorsHandler     func(context.Context, Job, error)
-	funcCtx           func(context.Context, Job) context.Context
-	running           bool
-	etcdclient        EtcdMutexBuilder
+	entries                []*Entry
+	useGlobalExecutionMode bool
+	stop                   chan struct{}
+	add                    chan *Entry
+	snapshot               chan []*Entry
+	etcdErrorsHandler      func(context.Context, Job, error)
+	errorsHandler          func(context.Context, Job, error)
+	funcCtx                func(context.Context, Job) context.Context
+	running                bool
+	etcdclient             EtcdMutexBuilder
 }
 
 // Job contains 3 mandatory options to define a job
@@ -106,6 +107,12 @@ func (s byTime) Less(i, j int) bool {
 
 type CronOpt func(cron *Cron)
 
+func WithUseGlobalExecutionMode(useGlobalExecutionMode bool) CronOpt {
+	return CronOpt(func(cron *Cron) {
+		cron.useGlobalExecutionMode = useGlobalExecutionMode
+	})
+}
+
 func WithEtcdErrorsHandler(f func(context.Context, Job, error)) CronOpt {
 	return CronOpt(func(cron *Cron) {
 		cron.etcdErrorsHandler = f
@@ -133,16 +140,17 @@ func WithFuncCtx(f func(context.Context, Job) context.Context) CronOpt {
 // New returns a new Cron job runner.
 func New(opts ...CronOpt) (*Cron, error) {
 	cron := &Cron{
-		entries:  nil,
-		add:      make(chan *Entry),
-		stop:     make(chan struct{}),
-		snapshot: make(chan []*Entry),
-		running:  false,
+		entries:                nil,
+		useGlobalExecutionMode: true,
+		add:                    make(chan *Entry),
+		stop:                   make(chan struct{}),
+		snapshot:               make(chan []*Entry),
+		running:                false,
 	}
 	for _, opt := range opts {
 		opt(cron)
 	}
-	if cron.etcdclient == nil {
+	if cron.etcdclient == nil && cron.useGlobalExecutionMode {
 		etcdClient, err := NewEtcdMutexBuilder(etcdclient.Config{
 			Endpoints: []string{defaultEtcdEndpoint},
 		})
@@ -251,6 +259,16 @@ func (c *Cron) run(ctx context.Context) {
 
 					if c.funcCtx != nil {
 						ctx = c.funcCtx(ctx, e.Job)
+					}
+
+					// If the global execution mode is not used, run the job directly.
+					if !c.useGlobalExecutionMode {
+						err := e.Job.Run(ctx)
+						if err != nil {
+							go c.errorsHandler(ctx, e.Job, err)
+							return
+						}
+						return
 					}
 
 					m, err := c.etcdclient.NewMutex(fmt.Sprintf("etcd_cron/%s/%d", e.Job.canonicalName(), effective.Unix()))
