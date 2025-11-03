@@ -1,3 +1,7 @@
+> [!CAUTION]
+> **This library was deprecated and archived on the 3rd of November 2025.**\
+> You can use the package [`github.com/Scalingo/go-utils/cronsetup`](https://github.com/Scalingo/go-utils/tree/master/cronsetup) in place of this one.
+
 # Go Etcd Cron v1.4.0
 
 This package has been based on the project [https://github.com/robfig/cron](https://github.com/robfig/cron)
