@@ -12,6 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Automatically merge Dependabot PRs
-        uses: scalingo/ghaction-dependabot-automerge@v1
+        uses: Scalingo/actions/dependabot-automerge@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
